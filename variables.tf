@@ -63,7 +63,7 @@ variable "vcn01_subnet_priv03_cidr_block" {
 }
 
 variable "vcn01_subnet_priv03_display_name" {
-  default = "vcn01_subnet_app01"
+  default = "vcn01_subnet_priv03"
 }
 
 variable "vcn02_cidr_block" {
@@ -131,16 +131,32 @@ variable "PrivateServerFlexShapeMemory" {
   default = 10
 }
 
-variable "FirewallServerShape" {
+variable "PaloAltoFirewallServerShape" {
   default = "VM.Standard2.4"
 }
 
-variable "FirewallServerFlexShapeOCPUS" {
+variable "PaloAltoFirewallServerFlexShapeOCPUS" {
   default = 1
 }
 
-variable "FirewallServerFlexShapeMemory" {
+variable "PaloAltoFirewallServerFlexShapeMemory" {
   default = 10
+}
+
+variable "PaloAltoFirewallServer_vcn01_priv01_vnic_ip" {
+  default = "10.0.1.2"
+}
+
+variable "PaloAltoFirewallServer_vcn01_priv02_vnic_ip" {
+  default = "10.0.2.2"
+}
+
+variable "PaloAltoFirewallServer_vcn01_priv03_vnic_ip" {
+  default = "10.0.3.2"
+}
+
+variable "PaloAltoFirewallServer_vcn02_priv04_vnic_ip" {
+  default = "10.1.1.2"
 }
 
 # Dictionary Locals
@@ -155,10 +171,10 @@ locals {
 
 # Checks if is using Flexible Compute Shapes
 locals {
-  is_flexible_frontend-server_shape = contains(local.compute_flexible_shapes, var.FrontendServerShape)
-  is_flexible_backend-server_shape  = contains(local.compute_flexible_shapes, var.BackendServerShape)
-  is_flexible_private-server_shape  = contains(local.compute_flexible_shapes, var.PrivateServerShape)
-  is_flexible_firewall-server_shape = contains(local.compute_flexible_shapes, var.FirewallServerShape)
+  is_flexible_frontend-server_shape          = contains(local.compute_flexible_shapes, var.FrontendServerShape)
+  is_flexible_backend-server_shape           = contains(local.compute_flexible_shapes, var.BackendServerShape)
+  is_flexible_private-server_shape           = contains(local.compute_flexible_shapes, var.PrivateServerShape)
+  is_flexible_paloalto-firewall-server_shape = contains(local.compute_flexible_shapes, var.PaloAltoFirewallServerShape)
 }
 
 

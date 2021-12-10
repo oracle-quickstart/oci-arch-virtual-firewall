@@ -1,27 +1,28 @@
 ## Copyright (c) 2021, Oracle and/or its affiliates. 
 ## All rights reserved. The Universal Permissive License (UPL), Version 1.0 as shown at http://oss.oracle.com/licenses/upl
 
-# FirewallServer 
+# PaloAltoFirewallServer 
 
-resource "oci_core_instance" "firewall-server" {
+resource "oci_core_instance" "paloalto-firewall-server" {
   availability_domain = var.availablity_domain_name == "" ? data.oci_identity_availability_domains.ADs.availability_domains[var.availablity_domain_number]["name"] : var.availablity_domain_name
   compartment_id      = var.compartment_ocid
-  display_name        = "firewall-server"
-  shape               = var.FirewallServerShape
+  display_name        = "paloalto-firewall-server"
+  shape               = var.PaloAltoFirewallServerShape
 
   dynamic "shape_config" {
-    for_each = local.is_flexible_firewall-server_shape ? [1] : []
+    for_each = local.is_flexible_paloalto-firewall-server_shape ? [1] : []
     content {
-      memory_in_gbs = var.FirewallServerFlexShapeMemory
-      ocpus         = var.FirewallServerFlexShapeOCPUS
+      memory_in_gbs = var.PaloAltoFirewallServerFlexShapeMemory
+      ocpus         = var.PaloAltoFirewallServerFlexShapeOCPUS
     }
   }
 
   create_vnic_details {
-    subnet_id        = oci_core_subnet.vcn01_subnet_pub01.id
-    display_name     = "vcn01pub01vnic"
-    assign_public_ip = true
-    nsg_ids          = [oci_core_network_security_group.SSHSecurityGroup.id, oci_core_network_security_group.HTTPxSecurityGroup.id]
+    subnet_id              = oci_core_subnet.vcn01_subnet_pub01.id
+    display_name           = "vcn01pub01vnic"
+    assign_public_ip       = true
+    skip_source_dest_check = true
+    nsg_ids                = [oci_core_network_security_group.SSHSecurityGroup.id, oci_core_network_security_group.HTTPxSecurityGroup.id]
   }
 
   source_details {
@@ -38,33 +39,41 @@ resource "oci_core_instance" "firewall-server" {
   defined_tags = { "${oci_identity_tag_namespace.ArchitectureCenterTagNamespace.name}.${oci_identity_tag.ArchitectureCenterTag.name}" = var.release }
 }
 
-resource "oci_core_vnic_attachment" "firewall-server_vcn01pub02vnic_attachment" {
-  create_vnic_details {
-    subnet_id        = oci_core_subnet.vcn01_subnet_pub02.id
-    display_name     = "vcn01pub02vnic"
-    assign_public_ip = false
-  }
-  instance_id = oci_core_instance.firewall-server.id
+data "oci_core_vnic_attachments" "paloalto-firewall-server_vcn01pub01vnic_attachment" {
+  availability_domain = var.availablity_domain_name == "" ? data.oci_identity_availability_domains.ADs.availability_domains[var.availablity_domain_number]["name"] : var.availablity_domain_name
+  compartment_id      = var.compartment_ocid
+  instance_id         = oci_core_instance.paloalto-firewall-server.id
 }
 
-resource "oci_core_vnic_attachment" "firewall-server_vcn01priv03vnic_attachment" {
+resource "oci_core_vnic_attachment" "paloalto-firewall-server_vcn01pub02vnic_attachment" {
   create_vnic_details {
-    subnet_id        = oci_core_subnet.vcn01_subnet_priv03.id
-    display_name     = "vcn01priv03vnic"
-    assign_public_ip = false
+    subnet_id              = oci_core_subnet.vcn01_subnet_pub02.id
+    display_name           = "vcn01pub02vnic"
+    assign_public_ip       = false
+    skip_source_dest_check = true
   }
-  instance_id = oci_core_instance.firewall-server.id
+  instance_id = oci_core_instance.paloalto-firewall-server.id
 }
 
-resource "oci_core_vnic_attachment" "firewall-server_vcn02priv04vnic_attachment" {
+resource "oci_core_vnic_attachment" "paloalto-firewall-server_vcn01priv03vnic_attachment" {
   create_vnic_details {
-    subnet_id        = oci_core_subnet.vcn02_subnet_priv04.id
-    display_name     = "vcn02priv04vnic"
-    assign_public_ip = false
+    subnet_id              = oci_core_subnet.vcn01_subnet_priv03.id
+    display_name           = "vcn01priv03vnic"
+    assign_public_ip       = false
+    skip_source_dest_check = true
   }
-  instance_id = oci_core_instance.firewall-server.id
+  instance_id = oci_core_instance.paloalto-firewall-server.id
 }
 
+resource "oci_core_vnic_attachment" "paloalto-firewall-server_vcn02priv04vnic_attachment" {
+  create_vnic_details {
+    subnet_id              = oci_core_subnet.vcn02_subnet_priv04.id
+    display_name           = "vcn02priv04vnic"
+    assign_public_ip       = false
+    skip_source_dest_check = true
+  }
+  instance_id = oci_core_instance.paloalto-firewall-server.id
+}
 
 # FrontendServer in VCN01/Subnet01
 
