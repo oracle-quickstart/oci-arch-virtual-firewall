@@ -6,3 +6,4 @@
 *.tfstate.*
 *.zip*
 *.tfvars
+.terraform.lock.hcl

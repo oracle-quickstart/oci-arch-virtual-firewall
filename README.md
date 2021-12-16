@@ -1,28 +1,113 @@
-# oci-quickstart-template
+# oci-arch-spring-boot
 
-The [Oracle Cloud Infrastructure (OCI) Quick Start](https://github.com/oracle-quickstart?q=oci-quickstart) is a collection of examples that allow Oracle Cloud Infrastructure users to get a quick start deploying advanced infrastructure on OCI.
+SpringBoot is an open source, Java-based framework that you can use to create production grade applications. SpringBoot simplifies the deployment of applications with minimal configuration and customization and includes third-party libraries to streamline the process.
 
-The oci-quickstart-template repository contains the template that can be used for accelerating the construction of quickstarts that runs from local Terraform CLI and OCI Resource Manager.
+MySQL Database service is a managed Database service on Oracle Cloud Infrastructure. In this deployment we will deploy 3 node cluster(app server) along with a Load Balancer and MySQL Database service.
 
-Simple is a sample application that deploys a standalone virtual machine from the Oracle Cloud Infrastructure Marketplace.
+## Terraform Provider for Oracle Cloud Infrastructure
+The OCI Terraform Provider is now available for automatic download through the Terraform Provider Registry. 
+For more information on how to get started view the [documentation](https://www.terraform.io/docs/providers/oci/index.html) 
+and [setup guide](https://www.terraform.io/docs/providers/oci/guides/version-3-upgrade.html).
 
-This repo is under active development.  Building open source software is a community effort.  We're excited to engage with the community building this.
-
-## How this project is organized
-
-Each application is stored on its own top level folder.
-
-Within the simple application project there are 3 modules:
-
-- [simple-cli](simple-cli): launch a simple VM that subscribes to a Marketplace Image running from Terraform CLI.
-- [simple-orm](simple-orm): Responsible for packaging the simple-cli module in OCI [Resource Manager Stack](https://docs.cloud.oracle.com/iaas/Content/ResourceManager/Tasks/managingstacksandjobs.htm) format.
-- [terraform-modules](terraform-modules): contains a list of re-usable terraform modules for managing infrastructure resources like vcn, subnets, security, etc.
+* [Documentation](https://www.terraform.io/docs/providers/oci/index.html)
+* [OCI forums](https://cloudcustomerconnect.oracle.com/resources/9c8fa8f96f/summary)
+* [Github issues](https://github.com/terraform-providers/terraform-provider-oci/issues)
+* [Troubleshooting](https://www.terraform.io/docs/providers/oci/guides/guides/troubleshooting.html)
 
 ## Prerequisites
 
-First off we'll need to do some pre deploy setup.  That's all detailed [here](https://github.com/oracle/oci-quickstart-prerequisites).
+- Permission to `manage` the following types of resources in your Oracle Cloud Infrastructure tenancy: `vcns`, `internet-gateways`, `route-tables`, `network-security-groups`, `subnets`, and `instances`.
 
-## Deploying Simple
+- Quota to create the following resources: 2 VCN, 4 subnets, 1 Internet Gateway, 2 route rules,  and 4 compute instance.
 
-Detailed instructions for deploying Simple on Oracle Cloud Infrastructure can be found in the [simple](./simple/README.md) space.
+If you don't have the required permissions and quota, contact your tenancy administrator. See [Policy Reference](https://docs.cloud.oracle.com/en-us/iaas/Content/Identity/Reference/policyreference.htm), [Service Limits](https://docs.cloud.oracle.com/en-us/iaas/Content/General/Concepts/servicelimits.htm), [Compartment Quotas](https://docs.cloud.oracle.com/iaas/Content/General/Concepts/resourcequotas.htm)
 
+- OCID of compartments with Security Zone and without Security Zone enabled
+
+## Deploy Using Oracle Resource Manager
+
+1. Click [![Deploy to Oracle Cloud](https://oci-resourcemanager-plugin.plugins.oci.oraclecloud.com/latest/deploy-to-oracle-cloud.svg)](https://console.us-ashburn-1.oraclecloud.com/resourcemanager/stacks/create?region=home&zipUrl=https://github.com/oracle-quickstart/oci-arch-spring-boot/releases/latest/download/oci-arch-spring-boot-stack-latest.zip)
+
+
+If you aren't already signed in, when prompted, enter the tenancy and user credentials.
+
+2. Review and accept the terms and conditions.
+
+3. Select the region where you want to deploy the stack.
+
+4. Follow the on-screen prompts and instructions to create the stack.
+
+5. After creating the stack, click **Terraform Actions**, and select **Plan**.
+
+6. Wait for the job to be completed, and review the plan.
+
+    To make any changes, return to the Stack Details page, click **Edit Stack**, and make the required changes. Then, run the **Plan** action again.
+
+7. If no further changes are necessary, return to the Stack Details page, click **Terraform Actions**, and select **Apply**. 
+
+## Deploy Using the Terraform CLI
+
+### Clone the Module and initialize 
+
+You'll want a local copy of this repo. You can make that with the commands:
+
+    git clone https://github.com/oracle-quickstart/oci-arch-spring-boot
+    cd oci-arch-spring-boot
+    ls
+
+You'll need to do some pre-deploy setup.  That's all detailed [here](https://github.com/cloud-partners/oci-prerequisites).
+Initialize them in  `terraform.tfvars` file and populate with the following information:
+
+```
+# Authentication
+tenancy_ocid         = <"">
+user_ocid            = <"">
+fingerprint          = <"">
+private_key_path     = <"">
+# SSH Keys
+ssh_public_key  = "id_rsa.pub"
+ssh_private_key = "id_rsa"
+
+# Region
+region = "us-ashburn-1"
+
+# Compartment
+compartment_ocid = <"">    (Compartment without Security Zones enabled)
+compartment_SZ_ocid = <""> (Compartment with Security Zones enabled)
+
+mysql_db_system_admin_password = <"">
+
+```
+
+NOTE: There are other variables that are assigned default value such as VCN CIDR and others. These can be changed in variables.tf file
+
+Deploy:
+
+    terraform init
+    terraform plan
+    terraform apply
+
+
+### Testing your Deployment
+After the deployment is finished, you can test if your SpringBoot application has deployed correctly and can access picking up the value of the springboot_app_url:
+
+````
+springboot_app_url = http://150.230.171.250/api/v1/customer
+`````
+
+Then copy it into Web browser. Here is the example of the succesfull outcome:
+
+![](./images/springbootdemo.png)
+
+## Destroy the Deployment 
+When you no longer need the deployment, you can run this command to destroy it:
+
+    terraform destroy
+
+## Deploy the Spring Boot framework on Oracle Cloud Infrastructure with MySQL Database Service
+![](./images/oci-arch-spring-boot.png)
+
+
+## Reference Architecture
+
+- [Deploy the Spring Boot framework on Oracle Cloud Infrastructure with MySQL Database Service](https://docs.oracle.com/en/solutions/springboot-mysql-oci/)
