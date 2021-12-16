@@ -1,8 +1,12 @@
-# oci-arch-spring-boot
+# oci-arch-virtual-firewall
 
-SpringBoot is an open source, Java-based framework that you can use to create production grade applications. SpringBoot simplifies the deployment of applications with minimal configuration and customization and includes third-party libraries to streamline the process.
+Although Oracle Cloud Infrastructure offers network security controls through security lists and network security groups, in some scenarios different types of network security are required. For those scenarios, Oracle Cloud Infrastructure uses virtual cloud networks (VCN) and subnets to lay the different segments of the network, and the firewall to handle the security controls.
 
-MySQL Database service is a managed Database service on Oracle Cloud Infrastructure. In this deployment we will deploy 3 node cluster(app server) along with a Load Balancer and MySQL Database service.
+For details of the architecture, see [Protect your cloud resources using a virtual firewall](https://docs.oracle.com/en/solutions/deploy-virtual-firewall/)
+
+## Architecture Diagram
+
+![](./images/firewall-oci.png)
 
 ## Terraform Provider for Oracle Cloud Infrastructure
 The OCI Terraform Provider is now available for automatic download through the Terraform Provider Registry. 
@@ -26,7 +30,7 @@ If you don't have the required permissions and quota, contact your tenancy admin
 
 ## Deploy Using Oracle Resource Manager
 
-1. Click [![Deploy to Oracle Cloud](https://oci-resourcemanager-plugin.plugins.oci.oraclecloud.com/latest/deploy-to-oracle-cloud.svg)](https://console.us-ashburn-1.oraclecloud.com/resourcemanager/stacks/create?region=home&zipUrl=https://github.com/oracle-quickstart/oci-arch-spring-boot/releases/latest/download/oci-arch-spring-boot-stack-latest.zip)
+1. Click [![Deploy to Oracle Cloud](https://oci-resourcemanager-plugin.plugins.oci.oraclecloud.com/latest/deploy-to-oracle-cloud.svg)](https://console.us-ashburn-1.oraclecloud.com/resourcemanager/stacks/create?region=home&zipUrl=https://github.com/oracle-quickstart/oci-arch-virtual-firewall/releases/latest/download/oci-arch-virtual-firewall-stack-latest.zip)
 
 
 If you aren't already signed in, when prompted, enter the tenancy and user credentials.
@@ -51,8 +55,8 @@ If you aren't already signed in, when prompted, enter the tenancy and user crede
 
 You'll want a local copy of this repo. You can make that with the commands:
 
-    git clone https://github.com/oracle-quickstart/oci-arch-spring-boot
-    cd oci-arch-spring-boot
+    git clone https://github.com/oracle-quickstart/oci-arch-virtual-firewall
+    cd oci-arch-virtual-firewall
     ls
 
 You'll need to do some pre-deploy setup.  That's all detailed [here](https://github.com/cloud-partners/oci-prerequisites).
@@ -60,22 +64,16 @@ Initialize them in  `terraform.tfvars` file and populate with the following info
 
 ```
 # Authentication
-tenancy_ocid         = <"">
-user_ocid            = <"">
-fingerprint          = <"">
-private_key_path     = <"">
-# SSH Keys
-ssh_public_key  = "id_rsa.pub"
-ssh_private_key = "id_rsa"
+tenancy_ocid         = "<tenancy_ocid>"
+user_ocid            = "<user_ocid>"
+fingerprint          = "<finger_print>"
+private_key_path     = "<pem_private_key_path>"
 
 # Region
-region = "us-ashburn-1"
+region = "<oci_region>"
 
 # Compartment
-compartment_ocid = <"">    (Compartment without Security Zones enabled)
-compartment_SZ_ocid = <""> (Compartment with Security Zones enabled)
-
-mysql_db_system_admin_password = <"">
+compartment_ocid = "<compartment_ocid>"
 
 ```
 
@@ -88,26 +86,7 @@ Deploy:
     terraform apply
 
 
-### Testing your Deployment
-After the deployment is finished, you can test if your SpringBoot application has deployed correctly and can access picking up the value of the springboot_app_url:
-
-````
-springboot_app_url = http://150.230.171.250/api/v1/customer
-`````
-
-Then copy it into Web browser. Here is the example of the succesfull outcome:
-
-![](./images/springbootdemo.png)
-
 ## Destroy the Deployment 
 When you no longer need the deployment, you can run this command to destroy it:
 
     terraform destroy
-
-## Deploy the Spring Boot framework on Oracle Cloud Infrastructure with MySQL Database Service
-![](./images/oci-arch-spring-boot.png)
-
-
-## Reference Architecture
-
-- [Deploy the Spring Boot framework on Oracle Cloud Infrastructure with MySQL Database Service](https://docs.oracle.com/en/solutions/springboot-mysql-oci/)
