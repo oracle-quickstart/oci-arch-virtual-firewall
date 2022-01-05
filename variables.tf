@@ -4,9 +4,9 @@
 variable "tenancy_ocid" {}
 variable "region" {}
 variable "compartment_ocid" {}
-variable "user_ocid" {}
-variable "fingerprint" {}
-variable "private_key_path" {}
+#variable "user_ocid" {}
+#variable "fingerprint" {}
+#variable "private_key_path" {}
 
 variable "ssh_public_key" {
   default = ""
@@ -17,15 +17,11 @@ variable "release" {
   default     = "1.0"
 }
 
-variable "availablity_domain_name" {
+variable "availability_domain_name" {
   default = ""
 }
-variable "availablity_domain_number" {
+variable "availability_domain_number" {
   default = 0
-}
-
-variable "use_bastion_service" {
-  default = false
 }
 
 variable "igw_display_name" {
