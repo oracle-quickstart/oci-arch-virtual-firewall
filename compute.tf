@@ -4,7 +4,7 @@
 # PaloAltoFirewallServer 
 
 resource "oci_core_instance" "paloalto-firewall-server" {
-  availability_domain = var.availablity_domain_name == "" ? data.oci_identity_availability_domains.ADs.availability_domains[var.availablity_domain_number]["name"] : var.availablity_domain_name
+  availability_domain = var.availability_domain_name == "" ? data.oci_identity_availability_domains.ADs.availability_domains[var.availability_domain_number]["name"] : var.availability_domain_name
   compartment_id      = var.compartment_ocid
   display_name        = "paloalto-firewall-server"
   shape               = var.PaloAltoFirewallServerShape
@@ -40,7 +40,7 @@ resource "oci_core_instance" "paloalto-firewall-server" {
 }
 
 data "oci_core_vnic_attachments" "paloalto-firewall-server_vcn01pub01vnic_attachment" {
-  availability_domain = var.availablity_domain_name == "" ? data.oci_identity_availability_domains.ADs.availability_domains[var.availablity_domain_number]["name"] : var.availablity_domain_name
+  availability_domain = var.availability_domain_name == "" ? data.oci_identity_availability_domains.ADs.availability_domains[var.availability_domain_number]["name"] : var.availability_domain_name
   compartment_id      = var.compartment_ocid
   instance_id         = oci_core_instance.paloalto-firewall-server.id
 }
@@ -78,7 +78,7 @@ resource "oci_core_vnic_attachment" "paloalto-firewall-server_vcn02priv04vnic_at
 # FrontendServer in VCN01/Subnet01
 
 resource "oci_core_instance" "frontend-server" {
-  availability_domain = var.availablity_domain_name == "" ? data.oci_identity_availability_domains.ADs.availability_domains[var.availablity_domain_number]["name"] : var.availablity_domain_name
+  availability_domain = var.availability_domain_name == "" ? data.oci_identity_availability_domains.ADs.availability_domains[var.availability_domain_number]["name"] : var.availability_domain_name
   compartment_id      = var.compartment_ocid
   display_name        = "frontend-server"
   shape               = var.FrontendServerShape
@@ -104,19 +104,6 @@ resource "oci_core_instance" "frontend-server" {
     boot_volume_size_in_gbs = "50"
   }
 
-  dynamic "agent_config" {
-    for_each = var.use_bastion_service ? [1] : []
-    content {
-      are_all_plugins_disabled = false
-      is_management_disabled   = false
-      is_monitoring_disabled   = false
-      plugins_config {
-        desired_state = "ENABLED"
-        name          = "Bastion"
-      }
-    }
-  }
-
   metadata = {
     ssh_authorized_keys = var.ssh_public_key
     user_data           = data.template_cloudinit_config.cloud_init.rendered
@@ -133,7 +120,7 @@ resource "oci_core_instance" "frontend-server" {
 # PrivateServer in VCN01/Subnet03
 
 resource "oci_core_instance" "private-server" {
-  availability_domain = var.availablity_domain_name == "" ? data.oci_identity_availability_domains.ADs.availability_domains[var.availablity_domain_number]["name"] : var.availablity_domain_name
+  availability_domain = var.availability_domain_name == "" ? data.oci_identity_availability_domains.ADs.availability_domains[var.availability_domain_number]["name"] : var.availability_domain_name
   compartment_id      = var.compartment_ocid
   display_name        = "private-server"
   shape               = var.PrivateServerShape
@@ -168,7 +155,7 @@ resource "oci_core_instance" "private-server" {
 }
 
 data "oci_core_vnic_attachments" "private-server_primaryvnic_attach" {
-  availability_domain = var.availablity_domain_name == "" ? data.oci_identity_availability_domains.ADs.availability_domains[var.availablity_domain_number]["name"] : var.availablity_domain_name
+  availability_domain = var.availability_domain_name == "" ? data.oci_identity_availability_domains.ADs.availability_domains[var.availability_domain_number]["name"] : var.availability_domain_name
   compartment_id      = var.compartment_ocid
   instance_id         = oci_core_instance.private-server.id
 }
@@ -181,7 +168,7 @@ data "oci_core_vnic" "frontend-server_primaryvnic" {
 # BackendServer in VCN02/Subnet04
 
 resource "oci_core_instance" "backend-server" {
-  availability_domain = var.availablity_domain_name == "" ? data.oci_identity_availability_domains.ADs.availability_domains[var.availablity_domain_number]["name"] : var.availablity_domain_name
+  availability_domain = var.availability_domain_name == "" ? data.oci_identity_availability_domains.ADs.availability_domains[var.availability_domain_number]["name"] : var.availability_domain_name
   compartment_id      = var.compartment_ocid
   display_name        = "backend-server"
   shape               = var.BackendServerShape
@@ -216,7 +203,7 @@ resource "oci_core_instance" "backend-server" {
 }
 
 data "oci_core_vnic_attachments" "backend-server_primaryvnic_attach" {
-  availability_domain = var.availablity_domain_name == "" ? data.oci_identity_availability_domains.ADs.availability_domains[var.availablity_domain_number]["name"] : var.availablity_domain_name
+  availability_domain = var.availability_domain_name == "" ? data.oci_identity_availability_domains.ADs.availability_domains[var.availability_domain_number]["name"] : var.availability_domain_name
   compartment_id      = var.compartment_ocid
   instance_id         = oci_core_instance.backend-server.id
 }

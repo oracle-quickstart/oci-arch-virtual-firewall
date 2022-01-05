@@ -6,10 +6,6 @@ output "generated_ssh_private_key" {
   sensitive = true
 }
 
-output "bastion_ssh_metadata" {
-  value = oci_bastion_session.ssh_via_bastion_service.*.ssh_metadata
-}
-
 output "paloalto-firewall-server" {
   value = [oci_core_instance.paloalto-firewall-server.public_ip]
 }
