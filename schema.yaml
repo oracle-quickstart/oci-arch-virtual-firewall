@@ -1,8 +1,8 @@
 ## Copyright © 2021, Oracle and/or its affiliates. 
 ## All rights reserved. The Universal Permissive License (UPL), Version 1.0 as shown at http://oss.oracle.com/licenses/upl
 
-title: "Protect your cloud resources using a virtual firewall"
-stackDescription: "Protect your cloud resources using a virtual firewall"
+title: "Protect your cloud resources using a PaloAlto virtual firewall"
+stackDescription: "Protect your cloud resources using a PaloAlto virtual firewall"
 schemaVersion: 1.1.0
 version: "20190404"
 locale: "en"
@@ -31,22 +31,22 @@ variableGroups:
   - ssh_public_key
   - instance_os
   - linux_os_version
-  - PaloAltoFirewallServerShape
-  - PaloAltoFirewallServerFlexShapeOCPUS
-  - PaloAltoFirewallServerFlexShapeMemory
-  - PaloAltoFirewallServer_vcn01_priv01_vnic_ip
-  - PaloAltoFirewallServer_vcn01_priv02_vnic_ip
-  - PaloAltoFirewallServer_vcn01_priv03_vnic_ip
-  - PaloAltoFirewallServer_vcn02_priv04_vnic_ip
-  - PrivateServerShape
-  - PrivateServerFlexShapeOCPUS
-  - PrivateServerFlexShapeMemory
-  - FrontendServerShape
-  - FrontendServerFlexShapeOCPUS
-  - FrontendServerFlexShapeMemory
-  - BackendServerShape
-  - BackendServerFlexShapeOCPUS
-  - BackendServerFlexShapeMemory
+  - vm_pan_firewall_Shape
+  - vm_pan_firewall_FlexShapeOCPUS
+  - vm_pan_firewall_FlexShapeMemory
+  - vm_pan_firewall_vcn01_priv01_vnic_ip
+  - vm_pan_firewall_vcn01_priv02_vnic_ip
+  - vm_pan_firewall_vcn01_priv03_vnic_ip
+  - vm_pan_firewall_vcn02_priv04_vnic_ip
+  - vm_vcn01priv03_Shape
+  - vm_vcn01priv03_FlexShapeOCPUS
+  - vm_vcn01priv03_FlexShapeMemory
+  - vm_vcn01pub02_Shape
+  - vm_vcn01pub02_FlexShapeOCPUS
+  - vm_vcn01pub02_FlexShapeMemory
+  - vm_vcn02priv04_Shape
+  - vm_vcn02priv04_FlexShapeOCPUS
+  - vm_vcn02priv04_FlexShapeMemory
 
 
 - title: Network Optional Configuration
@@ -58,17 +58,17 @@ variableGroups:
   - vcn01_display_name
   - vcn01_dns_label
   - vcn01_cidr_block
-  - vcn01_subnet_pub01_cidr_block
-  - vcn01_subnet_pub01_display_name
-  - vcn01_subnet_pub02_cidr_block
-  - vcn01_subnet_pub02_display_name
-  - vcn01_subnet_priv03_cidr_block
-  - vcn01_subnet_priv03_display_name
+  - vcn01_subnet_mgmt_pub01_cidr_block
+  - vcn01_subnet_mgmt_pub01_display_name
+  - vcn01_subnet_untrusted_pub02_cidr_block
+  - vcn01_subnet_untrusted_pub02_display_name
+  - vcn01_subnet_trusted_priv03_cidr_block
+  - vcn01_subnet_trusted_priv03_display_name
   - vcn02_display_name
   - vcn02_cidr_block
   - vcn02_dns_label
-  - vcn02_subnet_priv04_cidr_block
-  - vcn02_subnet_priv04_display_name
+  - vcn02_subnet_trusted_priv04_cidr_block
+  - vcn02_subnet_trusted_priv04_display_name
 
 variables:
 
@@ -130,7 +130,7 @@ variables:
     description: "Choose public SSH Key to be uploaded into compute instances."
     required: false
 
-  PaloAltoFirewallServerShape:
+  vm_pan_firewall_Shape:
     type: oci:core:instanceshape:name
     required: true
     title: "PaloAlto Firewall Server Shape"
@@ -139,7 +139,7 @@ variables:
     dependsOn:
       compartmentId: ${compartment_ocid}
 
-  PaloAltoFirewallServerFlexShapeOCPUS:
+  vm_pan_firewall_FlexShapeOCPUS:
     type: number
     required: false
     minimum: 1
@@ -152,19 +152,19 @@ variables:
       and:
         - or:
           - eq:
-            - PaloAltoFirewallServerShape 
+            - vm_pan_firewall_Shape 
             - "VM.Standard.E3.Flex"
           - eq:
-            - PaloAltoFirewallServerShape 
+            - vm_pan_firewall_Shape 
             - "VM.Standard.E4.Flex"
           - eq:
-            - PaloAltoFirewallServerShape 
+            - vm_pan_firewall_Shape 
             - "VM.Standard.A1.Flex"
           - eq:
-            - PaloAltoFirewallServerShape 
+            - vm_pan_firewall_Shape 
             - "VM.Optimized3.Flex"
 
-  PaloAltoFirewallServerFlexShapeMemory:
+  vm_pan_firewall_FlexShapeMemory:
     type: number
     required: false
     minimum: 1
@@ -177,217 +177,217 @@ variables:
       and:
         - or:
           - eq:
-            - PaloAltoFirewallServerShape 
+            - vm_pan_firewall_Shape 
             - "VM.Standard.E3.Flex"
           - eq:
-            - PaloAltoFirewallServerShape 
+            - vm_pan_firewall_Shape 
             - "VM.Standard.E4.Flex"
           - eq:
-            - PaloAltoFirewallServerShape 
+            - vm_pan_firewall_Shape 
             - "VM.Standard.A1.Flex"
           - eq:
-            - PaloAltoFirewallServerShape 
+            - vm_pan_firewall_Shape 
             - "VM.Optimized3.Flex"
 
-  PaloAltoFirewallServer_vcn01_priv01_vnic_ip:
+  vm_pan_firewall_vcn01_priv01_vnic_ip:
     type: string
     required: false
     title: "PaloAlto Firewall Server VCN1 Priv1 VNIC IP"
     description: "PaloAlto Firewall Server VCN1 Priv1 VNIC IP"
 
-  PaloAltoFirewallServer_vcn01_priv02_vnic_ip:
+  vm_pan_firewall_vcn01_priv02_vnic_ip:
     type: string
     required: false
     title: "PaloAlto Firewall Server VCN1 Priv2 VNIC IP"
     description: "PaloAlto Firewall Server VCN1 Priv2 VNIC IP"
 
-  PaloAltoFirewallServer_vcn01_priv03_vnic_ip:
+  vm_pan_firewall_vcn01_priv03_vnic_ip:
     type: string
     required: false
     title: "PaloAlto Firewall Server VCN1 Priv3 VNIC IP"
     description: "PaloAlto Firewall Server VCN1 Priv3 VNIC IP"
 
-  PaloAltoFirewallServer_vcn02_priv04_vnic_ip:
+  vm_pan_firewall_vcn02_priv04_vnic_ip:
     type: string
     required: false
     title: "PaloAlto Firewall Server VCN2 Priv4 VNIC IP"
     description: "PaloAlto Firewall Server VCN2 Priv4 VNIC IP"
 
-  FrontendServerShape:
+  vm_vcn01pub02_Shape:
     type: oci:core:instanceshape:name
     required: true
-    title: "Frontend Server Shape"
+    title: "vm_vcn01pub2 Server Shape"
     description: "Choose a shape allocated to Frontend Server."
-    default: "VM.Standard2.4"
+    default: "VM.Standard.E3.Flex"
     dependsOn:
       compartmentId: ${compartment_ocid}
 
-  FrontendServerFlexShapeOCPUS:
+  vm_vcn01pub02_FlexShapeOCPUS:
     type: number
     required: false
     minimum: 1
     maximum: 128
     multipleOf: 1
     default: 1
-    title: "Frontend Server Flex Shape OCPUs"
+    title: "vm_vcn01pub2 Server Flex Shape OCPUs"
     description: "Choose number of OCPUs for Flex Shape."
     visible:
       and:
         - or:
           - eq:
-            - FrontendServerShape 
+            - vm_vcn01pub02_Shape 
             - "VM.Standard.E3.Flex"
           - eq:
-            - FrontendServerShape 
+            - vm_vcn01pub02_Shape 
             - "VM.Standard.E4.Flex"
           - eq:
-            - FrontendServerShape 
+            - vm_vcn01pub02_Shape 
             - "VM.Standard.A1.Flex"
           - eq:
-            - FrontendServerShape 
+            - vm_vcn01pub02_Shape 
             - "VM.Optimized3.Flex"
 
-  FrontendServerFlexShapeMemory:
+  vm_vcn01pub02_FlexShapeMemory:
     type: number
     required: false
     minimum: 1
     maximum: 128
     multipleOf: 1
     default: 1
-    title: "Frontend Server Flex Shape Memory (GB)"
+    title: "vm_vcn01pub2 Server Flex Shape Memory (GB)"
     description: "Choose number GB for Flex Shape Memory."
     visible:
       and:
         - or:
           - eq:
-            - FrontendServerShape 
+            - vm_vcn01pub02_Shape 
             - "VM.Standard.E3.Flex"
           - eq:
-            - FrontendServerShape 
+            - vm_vcn01pub02_Shape 
             - "VM.Standard.E4.Flex"
           - eq:
-            - FrontendServerShape 
+            - vm_vcn01pub02_Shape 
             - "VM.Standard.A1.Flex"
           - eq:
-            - FrontendServerShape 
+            - vm_vcn01pub02_Shape 
             - "VM.Optimized3.Flex"
 
-  BackendServerShape:
+  vm_vcn02priv04_Shape:
     type: oci:core:instanceshape:name
     required: true
-    title: "Backend Server Shape"
+    title: "vm_vcn02priv04 Server Shape"
     description: "Choose a shape allocated to Backend Server."
-    default: "VM.Standard2.4"
+    default: "VM.Standard.E3.Flex"
     dependsOn:
       compartmentId: ${compartment_ocid}
 
-  BackendServerFlexShapeOCPUS:
+  vm_vcn02priv04_FlexShapeOCPUS:
     type: number
     required: false
     minimum: 1
     maximum: 128
     multipleOf: 1
     default: 1
-    title: "Backend Server Flex Shape OCPUs"
+    title: "vm_vcn02priv04 Server Flex Shape OCPUs"
     description: "Choose number of OCPUs for Flex Shape."
     visible:
       and:
         - or:
           - eq:
-            - BackendServerShape 
+            - vm_vcn02priv04_Shape 
             - "VM.Standard.E3.Flex"
           - eq:
-            - BackendServerShape 
+            - vm_vcn02priv04_Shape 
             - "VM.Standard.E4.Flex"
           - eq:
-            - BackendServerShape 
+            - vm_vcn02priv04_Shape 
             - "VM.Standard.A1.Flex"
           - eq:
-            - BackendServerShape 
+            - vm_vcn02priv04_Shape 
             - "VM.Optimized3.Flex"
 
-  BackendServerFlexShapeMemory:
+  vm_vcn02priv04_FlexShapeMemory:
     type: number
     required: false
     minimum: 1
     maximum: 128
     multipleOf: 1
     default: 1
-    title: "Backend Server Flex Shape Memory (GB)"
+    title: "vm_vcn02priv04 Server Flex Shape Memory (GB)"
     description: "Choose number GB for Flex Shape Memory."
     visible:
       and:
         - or:
           - eq:
-            - BackendServerShape 
+            - vm_vcn02priv04_Shape 
             - "VM.Standard.E3.Flex"
           - eq:
-            - BackendServerShape 
+            - vm_vcn02priv04_Shape 
             - "VM.Standard.E4.Flex"
           - eq:
-            - BackendServerShape 
+            - vm_vcn02priv04_Shape 
             - "VM.Standard.A1.Flex"
           - eq:
-            - BackendServerShape 
+            - vm_vcn02priv04_Shape 
             - "VM.Optimized3.Flex"
 
-  PrivateServerShape:
+  vm_vcn01priv03_Shape:
     type: oci:core:instanceshape:name
     required: true
-    title: "Private Server Shape"
-    description: "Choose a shape allocated to Private Server."
-    default: "VM.Standard2.4"
+    title: "vm_vcn01priv03 Server Shape"
+    description: "Choose a shape allocated to vm_vcn01priv03 Server."
+    default: "VM.Standard.E3.Flex"
     dependsOn:
       compartmentId: ${compartment_ocid}
 
-  PrivateServerFlexShapeOCPUS:
+  vm_vcn01priv03_FlexShapeOCPUS:
     type: number
     required: false
     minimum: 1
     maximum: 128
     multipleOf: 1
     default: 1
-    title: "Private Server Flex Shape OCPUs"
+    title: "vm_vcn01priv03 Server Flex Shape OCPUs"
     description: "Choose number of OCPUs for Flex Shape."
     visible:
       and:
         - or:
           - eq:
-            - PrivateServerShape 
+            - vm_vcn01priv03_Shape 
             - "VM.Standard.E3.Flex"
           - eq:
-            - PrivateServerShape 
+            - vm_vcn01priv03_Shape 
             - "VM.Standard.E4.Flex"
           - eq:
-            - PrivateServerShape 
+            - vm_vcn01priv03_Shape 
             - "VM.Standard.A1.Flex"
           - eq:
-            - PrivateServerShape 
+            - vm_vcn01priv03_Shape 
             - "VM.Optimized3.Flex"
 
-  PrivateServerFlexShapeMemory:
+  vm_vcn01priv03_FlexShapeMemory:
     type: number
     required: false
     minimum: 1
     maximum: 128
     multipleOf: 1
     default: 1
-    title: "Private Server Flex Shape Memory (GB)"
+    title: "vm_vcn01priv03 Flex Shape Memory (GB)"
     description: "Choose number GB for Flex Shape Memory."
     visible:
       and:
         - or:
           - eq:
-            - PrivateServerShape 
+            - vm_vcn01priv03_Shape 
             - "VM.Standard.E3.Flex"
           - eq:
-            - PrivateServerShape 
+            - vm_vcn01priv03_Shape 
             - "VM.Standard.E4.Flex"
           - eq:
-            - PrivateServerShape 
+            - vm_vcn01priv03_Shape 
             - "VM.Standard.A1.Flex"
           - eq:
-            - PrivateServerShape 
+            - vm_vcn01priv03_Shape 
             - "VM.Optimized3.Flex"
 
   igw_display_name:
@@ -415,44 +415,44 @@ variables:
     title: "Name of VCN1"
     description: "Type Display Name assigned to VCN1."
 
-  vcn01_subnet_pub01_cidr_block:
+  vcn01_subnet_mgmt_pub01_cidr_block:
     type: string
     required: false
-    title: "VCN1's first Public Subnet CIDR Block"
-    description: "Choose CIDR block of the first Public Subnet in the VCN1."
+    title: "VCN1's Management Public Subnet CIDR Block"
+    description: "Choose CIDR block of the Management Public Subnet in the VCN1."
     pattern: "^(25[0-5]|2[0-4][0-9]|1[0-9][0-9]|[1-9]?[0-9]).(25[0-5]|2[0-4][0-9]|1[0-9][0-9]|[1-9]?[0-9]).(25[0-5]|2[0-4][0-9]|1[0-9][0-9]|[1-9]?[0-9]).(25[0-5]|2[0-4][0-9]|1[0-9][0-9]|[1-9]?[0-9])\\/(3[0-2]|[1-2]?[0-9])$"
 
-  vcn01_subnet_pub01_display_name:
+  vcn01_subnet_mgmt_pub01_display_name:
     type: string
     required: false
-    title: "Name of the first Public Subnet in VCN1"
-    description: "Type the first Public Subnet Display Name in the VCN1."
+    title: "Name of Management Public Subnet in VCN1"
+    description: "Type Management Public Subnet Display Name in the VCN1."
 
-  vcn01_subnet_pub02_cidr_block:
+  vcn01_subnet_untrusted_pub02_cidr_block:
     type: string
     required: false
-    title: "VCN1's second Public Subnet CIDR Block"
-    description: "Choose CIDR block of the second Public Subnet in the VCN1"
+    title: "VCN1's Untrusted Public Subnet CIDR Block"
+    description: "Choose CIDR block of Untrusted Public Subnet in the VCN1"
     pattern: "^(25[0-5]|2[0-4][0-9]|1[0-9][0-9]|[1-9]?[0-9]).(25[0-5]|2[0-4][0-9]|1[0-9][0-9]|[1-9]?[0-9]).(25[0-5]|2[0-4][0-9]|1[0-9][0-9]|[1-9]?[0-9]).(25[0-5]|2[0-4][0-9]|1[0-9][0-9]|[1-9]?[0-9])\\/(3[0-2]|[1-2]?[0-9])$"
 
-  vcn01_subnet_pub02_display_name:
+  vcn01_subnet_untrusted_pub02_display_name:
     type: string
     required: false
-    title: "Name of the second Public Subnet in VCN1"
-    description: "Type the second Public Subnet Display Name in the VCN1."
+    title: "Name of Untrusted Public Subnet in VCN1"
+    description: "Type Untrusted Public Subnet Display Name in the VCN1."
 
-  vcn01_subnet_priv03_cidr_block:
+  vcn01_subnet_trusted_priv03_cidr_block:
     type: string
     required: false
-    title: "VCN1's Private Subnet CIDR Block"
-    description: "Choose CIDR block of the Private Subnet in the VCN1"
+    title: "VCN1's Trusted Subnet CIDR Block"
+    description: "Choose CIDR block of Trusted Subnet in the VCN1"
     pattern: "^(25[0-5]|2[0-4][0-9]|1[0-9][0-9]|[1-9]?[0-9]).(25[0-5]|2[0-4][0-9]|1[0-9][0-9]|[1-9]?[0-9]).(25[0-5]|2[0-4][0-9]|1[0-9][0-9]|[1-9]?[0-9]).(25[0-5]|2[0-4][0-9]|1[0-9][0-9]|[1-9]?[0-9])\\/(3[0-2]|[1-2]?[0-9])$"
   
-  vcn01_subnet_priv03_display_name:
+  vcn01_subnet_trusted_priv03_display_name:
     type: string
     required: false
-    title: "Name of the Private Subnet in VCN1"
-    description: "Type Private Subnet Display Name in the VCN1."
+    title: "Name of Trusted Subnet in VCN1"
+    description: "Type Trusted Subnet Display Name in the VCN1."
 
   vcn02_cidr_block:
     type: string
@@ -473,18 +473,18 @@ variables:
     title: "Name of VCN2"
     description: "Type Display Name assigned to VCN2."
 
-  vcn02_subnet_priv04_cidr_block:
+  vcn02_subnet_trusted_priv04_cidr_block:
     type: string
     required: false
-    title: "VCN2's Private Subnet CIDR Block"
-    description: "Choose CIDR block of the Private Subnet in the VCN2"
+    title: "VCN2's Trusted Subnet CIDR Block"
+    description: "Choose CIDR block of Trusted Subnet in the VCN2"
     pattern: "^(25[0-5]|2[0-4][0-9]|1[0-9][0-9]|[1-9]?[0-9]).(25[0-5]|2[0-4][0-9]|1[0-9][0-9]|[1-9]?[0-9]).(25[0-5]|2[0-4][0-9]|1[0-9][0-9]|[1-9]?[0-9]).(25[0-5]|2[0-4][0-9]|1[0-9][0-9]|[1-9]?[0-9])\\/(3[0-2]|[1-2]?[0-9])$"
   
-  vcn02_subnet_priv04_display_name:
+  vcn02_subnet_trusted_priv04_display_name:
     type: string
     required: false
-    title: "Name of the Private Subnet in VCN2"
-    description: "Type the second Public Subnet Display Name in the VCN2."
+    title: "Name of Trusted Subnet in VCN2"
+    description: "Type Trusted Subnet Display Name in the VCN2."
 
 outputs:
 

@@ -6,6 +6,6 @@ output "generated_ssh_private_key" {
   sensitive = true
 }
 
-output "paloalto-firewall-server" {
-  value = [oci_core_instance.paloalto-firewall-server.public_ip]
+output "vm_pan_firewall_mgmt_public_ip" {
+  value = [oci_core_instance.vm_pan_firewall.public_ip]
 }

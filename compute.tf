@@ -1,25 +1,26 @@
 ## Copyright (c) 2021, Oracle and/or its affiliates. 
 ## All rights reserved. The Universal Permissive License (UPL), Version 1.0 as shown at http://oss.oracle.com/licenses/upl
 
-# PaloAltoFirewallServer 
+# vm_pan_firewall 
 
-resource "oci_core_instance" "paloalto-firewall-server" {
+resource "oci_core_instance" "vm_pan_firewall" {
   availability_domain = var.availability_domain_name == "" ? data.oci_identity_availability_domains.ADs.availability_domains[var.availability_domain_number]["name"] : var.availability_domain_name
   compartment_id      = var.compartment_ocid
-  display_name        = "paloalto-firewall-server"
-  shape               = var.PaloAltoFirewallServerShape
+  display_name        = "vm_pan_firewall"
+  shape               = var.vm_pan_firewall_Shape
 
   dynamic "shape_config" {
-    for_each = local.is_flexible_paloalto-firewall-server_shape ? [1] : []
+    for_each = local.is_flexible_vm_pan_firewall_shape ? [1] : []
     content {
-      memory_in_gbs = var.PaloAltoFirewallServerFlexShapeMemory
-      ocpus         = var.PaloAltoFirewallServerFlexShapeOCPUS
+      memory_in_gbs = var.vm_pan_firewall_FlexShapeMemory
+      ocpus         = var.vm_pan_firewall_FlexShapeOCPUS
     }
   }
 
   create_vnic_details {
-    subnet_id              = oci_core_subnet.vcn01_subnet_pub01.id
-    display_name           = "vcn01pub01vnic"
+    subnet_id              = oci_core_subnet.vcn01_subnet_mgmt_pub01.id
+    private_ip             = var.vm_pan_firewall_vcn01_priv01_vnic_ip
+    display_name           = "vcn01_mgmt_vnic"
     assign_public_ip       = true
     skip_source_dest_check = true
     nsg_ids                = [oci_core_network_security_group.SSHSecurityGroup.id, oci_core_network_security_group.HTTPxSecurityGroup.id]
@@ -39,68 +40,87 @@ resource "oci_core_instance" "paloalto-firewall-server" {
   defined_tags = { "${oci_identity_tag_namespace.ArchitectureCenterTagNamespace.name}.${oci_identity_tag.ArchitectureCenterTag.name}" = var.release }
 }
 
-data "oci_core_vnic_attachments" "paloalto-firewall-server_vcn01pub01vnic_attachment" {
+resource "oci_core_vnic_attachment" "vm_pan_firewall_vcn01pub02vnic_attachment" {
+  create_vnic_details {
+    subnet_id              = oci_core_subnet.vcn01_subnet_untrusted_pub02.id
+    display_name           = "vcn01_untrusted_vnic"
+    assign_public_ip       = false
+    skip_source_dest_check = true
+  }
+  instance_id = oci_core_instance.vm_pan_firewall.id
+}
+
+resource "oci_core_private_ip" "vm_pan_firewall_vcn01_pub02_private_ip" {
+  ip_address   = var.vm_pan_firewall_vcn01_priv02_vnic_ip
+  vnic_id      = oci_core_vnic_attachment.vm_pan_firewall_vcn01pub02vnic_attachment.vnic_id
+  display_name = "vcn01priv02vnic_private_ip"
+}
+
+resource "oci_core_public_ip" "vm_pan_firewall_vcn01_pub02_public_ip" {
+  compartment_id = var.compartment_ocid
+  lifetime       = "RESERVED"
+  display_name   = "vcn01priv02vnic_public_ip"
+  private_ip_id  = oci_core_private_ip.vm_pan_firewall_vcn01_pub02_private_ip.id
+}
+
+resource "oci_core_vnic_attachment" "vm_pan_firewall_vcn01priv03vnic_attachment" {
+  create_vnic_details {
+    subnet_id              = oci_core_subnet.vcn01_subnet_trusted_priv03.id
+    display_name           = "vcn01_trusted_vnic"
+    assign_public_ip       = false
+    skip_source_dest_check = true
+  }
+  instance_id = oci_core_instance.vm_pan_firewall.id
+}
+
+resource "oci_core_private_ip" "vm_pan_firewall_vcn01_priv03_private_ip" {
+  ip_address   = var.vm_pan_firewall_vcn01_priv03_vnic_ip
+  vnic_id      = oci_core_vnic_attachment.vm_pan_firewall_vcn01priv03vnic_attachment.vnic_id
+  display_name = "vcn01_trusted_vnic_private_ip"
+}
+
+resource "oci_core_vnic_attachment" "vm_pan_firewall_vcn02priv04vnic_attachment" {
+  create_vnic_details {
+    subnet_id              = oci_core_subnet.vcn02_subnet_trusted_priv04.id
+    display_name           = "vcn02_trusted_vnic"
+    assign_public_ip       = false
+    skip_source_dest_check = true
+  }
+  instance_id = oci_core_instance.vm_pan_firewall.id
+}
+
+resource "oci_core_private_ip" "vm_pan_firewall_vcn02_priv04_private_ip" {
+  ip_address   = var.vm_pan_firewall_vcn02_priv04_vnic_ip
+  vnic_id      = oci_core_vnic_attachment.vm_pan_firewall_vcn02priv04vnic_attachment.vnic_id
+  display_name = "vcn02_trusted_vnic_private_ip"
+}
+
+# vm_vcn01pub02 in VCN01/Subnet02
+
+resource "oci_core_instance" "vm_vcn01pub2" {
   availability_domain = var.availability_domain_name == "" ? data.oci_identity_availability_domains.ADs.availability_domains[var.availability_domain_number]["name"] : var.availability_domain_name
   compartment_id      = var.compartment_ocid
-  instance_id         = oci_core_instance.paloalto-firewall-server.id
-}
-
-resource "oci_core_vnic_attachment" "paloalto-firewall-server_vcn01pub02vnic_attachment" {
-  create_vnic_details {
-    subnet_id              = oci_core_subnet.vcn01_subnet_pub02.id
-    display_name           = "vcn01pub02vnic"
-    assign_public_ip       = false
-    skip_source_dest_check = true
-  }
-  instance_id = oci_core_instance.paloalto-firewall-server.id
-}
-
-resource "oci_core_vnic_attachment" "paloalto-firewall-server_vcn01priv03vnic_attachment" {
-  create_vnic_details {
-    subnet_id              = oci_core_subnet.vcn01_subnet_priv03.id
-    display_name           = "vcn01priv03vnic"
-    assign_public_ip       = false
-    skip_source_dest_check = true
-  }
-  instance_id = oci_core_instance.paloalto-firewall-server.id
-}
-
-resource "oci_core_vnic_attachment" "paloalto-firewall-server_vcn02priv04vnic_attachment" {
-  create_vnic_details {
-    subnet_id              = oci_core_subnet.vcn02_subnet_priv04.id
-    display_name           = "vcn02priv04vnic"
-    assign_public_ip       = false
-    skip_source_dest_check = true
-  }
-  instance_id = oci_core_instance.paloalto-firewall-server.id
-}
-
-# FrontendServer in VCN01/Subnet01
-
-resource "oci_core_instance" "frontend-server" {
-  availability_domain = var.availability_domain_name == "" ? data.oci_identity_availability_domains.ADs.availability_domains[var.availability_domain_number]["name"] : var.availability_domain_name
-  compartment_id      = var.compartment_ocid
-  display_name        = "frontend-server"
-  shape               = var.FrontendServerShape
+  display_name        = "vm_vcn01pub02"
+  shape               = var.vm_vcn01pub02_Shape
 
   dynamic "shape_config" {
-    for_each = local.is_flexible_frontend-server_shape ? [1] : []
+    for_each = local.is_flexible_vm_vcn01pub02_shape ? [1] : []
     content {
-      memory_in_gbs = var.FrontendServerFlexShapeMemory
-      ocpus         = var.FrontendServerFlexShapeOCPUS
+      memory_in_gbs = var.vm_vcn01pub02_FlexShapeMemory
+      ocpus         = var.vm_vcn01pub02_FlexShapeOCPUS
     }
   }
 
   create_vnic_details {
-    subnet_id        = oci_core_subnet.vcn01_subnet_pub01.id
-    display_name     = "vcn01pub01vnic"
+    subnet_id        = oci_core_subnet.vcn01_subnet_untrusted_pub02.id
+    display_name     = "vm_vcn01pub02_vnic"
     assign_public_ip = false
     nsg_ids          = [oci_core_network_security_group.SSHSecurityGroup.id]
   }
 
   source_details {
     source_type             = "image"
-    source_id               = lookup(data.oci_core_images.FrontendServerImageOCID.images[0], "id")
+    source_id               = lookup(data.oci_core_images.vm_vcn01pub02_ImageOCID.images[0], "id")
     boot_volume_size_in_gbs = "50"
   }
 
@@ -117,32 +137,32 @@ resource "oci_core_instance" "frontend-server" {
   defined_tags = { "${oci_identity_tag_namespace.ArchitectureCenterTagNamespace.name}.${oci_identity_tag.ArchitectureCenterTag.name}" = var.release }
 }
 
-# PrivateServer in VCN01/Subnet03
+# vm_vcn01priv03 in VCN01/Subnet03
 
-resource "oci_core_instance" "private-server" {
+resource "oci_core_instance" "vm_vcn01priv03" {
   availability_domain = var.availability_domain_name == "" ? data.oci_identity_availability_domains.ADs.availability_domains[var.availability_domain_number]["name"] : var.availability_domain_name
   compartment_id      = var.compartment_ocid
-  display_name        = "private-server"
-  shape               = var.PrivateServerShape
+  display_name        = "vm_vcn01priv03"
+  shape               = var.vm_vcn01priv03_Shape
 
   dynamic "shape_config" {
-    for_each = local.is_flexible_private-server_shape ? [1] : []
+    for_each = local.is_flexible_vm_vcn01priv03_shape ? [1] : []
     content {
-      memory_in_gbs = var.PrivateServerFlexShapeMemory
-      ocpus         = var.PrivateServerFlexShapeOCPUS
+      memory_in_gbs = var.vm_vcn01priv03_FlexShapeMemory
+      ocpus         = var.vm_vcn01priv03_FlexShapeOCPUS
     }
   }
 
   create_vnic_details {
-    subnet_id        = oci_core_subnet.vcn01_subnet_priv03.id
-    display_name     = "vcn01priv03vnic"
+    subnet_id        = oci_core_subnet.vcn01_subnet_trusted_priv03.id
+    display_name     = "vm_vcn01priv03_vnic"
     assign_public_ip = false
     nsg_ids          = [oci_core_network_security_group.SSHSecurityGroup.id]
   }
 
   source_details {
     source_type             = "image"
-    source_id               = lookup(data.oci_core_images.PrivateServerImageOCID.images[0], "id")
+    source_id               = lookup(data.oci_core_images.vm_vcn01priv03_ImageOCID.images[0], "id")
     boot_volume_size_in_gbs = "50"
   }
 
@@ -154,43 +174,43 @@ resource "oci_core_instance" "private-server" {
   defined_tags = { "${oci_identity_tag_namespace.ArchitectureCenterTagNamespace.name}.${oci_identity_tag.ArchitectureCenterTag.name}" = var.release }
 }
 
-data "oci_core_vnic_attachments" "private-server_primaryvnic_attach" {
+data "oci_core_vnic_attachments" "vm_vcn01priv03_primaryvnic_attach" {
   availability_domain = var.availability_domain_name == "" ? data.oci_identity_availability_domains.ADs.availability_domains[var.availability_domain_number]["name"] : var.availability_domain_name
   compartment_id      = var.compartment_ocid
-  instance_id         = oci_core_instance.private-server.id
+  instance_id         = oci_core_instance.vm_vcn01priv03.id
 }
 
-data "oci_core_vnic" "frontend-server_primaryvnic" {
-  vnic_id = data.oci_core_vnic_attachments.private-server_primaryvnic_attach.vnic_attachments.0.vnic_id
+data "oci_core_vnic" "vm_vcn01pub2_primaryvnic" {
+  vnic_id = data.oci_core_vnic_attachments.vm_vcn01priv03_primaryvnic_attach.vnic_attachments.0.vnic_id
 }
 
 
-# BackendServer in VCN02/Subnet04
+# vm_vcn02priv04 in VCN02/Subnet04
 
-resource "oci_core_instance" "backend-server" {
+resource "oci_core_instance" "vm_vcn02priv04" {
   availability_domain = var.availability_domain_name == "" ? data.oci_identity_availability_domains.ADs.availability_domains[var.availability_domain_number]["name"] : var.availability_domain_name
   compartment_id      = var.compartment_ocid
-  display_name        = "backend-server"
-  shape               = var.BackendServerShape
+  display_name        = "vm_vcn02priv04"
+  shape               = var.vm_vcn02priv04_Shape
 
   dynamic "shape_config" {
-    for_each = local.is_flexible_backend-server_shape ? [1] : []
+    for_each = local.is_flexible_vm_vcn02priv04_shape ? [1] : []
     content {
-      memory_in_gbs = var.BackendServerFlexShapeMemory
-      ocpus         = var.BackendServerFlexShapeOCPUS
+      memory_in_gbs = var.vm_vcn02priv04_FlexShapeMemory
+      ocpus         = var.vm_vcn02priv04_FlexShapeOCPUS
     }
   }
 
   create_vnic_details {
-    subnet_id        = oci_core_subnet.vcn02_subnet_priv04.id
-    display_name     = "vcn02pub04vnic"
+    subnet_id        = oci_core_subnet.vcn02_subnet_trusted_priv04.id
+    display_name     = "vm_vcn02priv04_vnic"
     assign_public_ip = false
     nsg_ids          = [oci_core_network_security_group.SSHSecurityGroup2.id]
   }
 
   source_details {
     source_type             = "image"
-    source_id               = lookup(data.oci_core_images.FrontendServerImageOCID.images[0], "id")
+    source_id               = lookup(data.oci_core_images.vm_vcn02priv04_ImageOCID.images[0], "id")
     boot_volume_size_in_gbs = "50"
   }
 
@@ -202,14 +222,14 @@ resource "oci_core_instance" "backend-server" {
   defined_tags = { "${oci_identity_tag_namespace.ArchitectureCenterTagNamespace.name}.${oci_identity_tag.ArchitectureCenterTag.name}" = var.release }
 }
 
-data "oci_core_vnic_attachments" "backend-server_primaryvnic_attach" {
+data "oci_core_vnic_attachments" "vm_vcn02priv04_primaryvnic_attach" {
   availability_domain = var.availability_domain_name == "" ? data.oci_identity_availability_domains.ADs.availability_domains[var.availability_domain_number]["name"] : var.availability_domain_name
   compartment_id      = var.compartment_ocid
-  instance_id         = oci_core_instance.backend-server.id
+  instance_id         = oci_core_instance.vm_vcn02priv04.id
 }
 
-data "oci_core_vnic" "backend-server_primaryvnic" {
-  vnic_id = data.oci_core_vnic_attachments.backend-server_primaryvnic_attach.vnic_attachments.0.vnic_id
+data "oci_core_vnic" "vm_vcn02priv04_primaryvnic" {
+  vnic_id = data.oci_core_vnic_attachments.vm_vcn02priv04_primaryvnic_attach.vnic_attachments.0.vnic_id
 }
 
 
