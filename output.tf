@@ -6,6 +6,11 @@ output "generated_ssh_private_key" {
   sensitive = true
 }
 
+output "generated_ssh_public_key" {
+  value     = tls_private_key.public_private_key_pair.public_key_openssh
+  sensitive = true
+}
+
 output "vm_pan_firewall_mgmt_public_ip" {
   value = [oci_core_instance.vm_pan_firewall.public_ip]
 }

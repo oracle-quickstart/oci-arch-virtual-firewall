@@ -21,9 +21,9 @@ resource "oci_core_instance" "vm_pan_firewall" {
     subnet_id              = oci_core_subnet.vcn01_subnet_mgmt_pub01.id
     private_ip             = var.vm_pan_firewall_vcn01_priv01_vnic_ip
     display_name           = "vcn01_mgmt_vnic"
+    nsg_ids                = [oci_core_network_security_group.MgmtSecurityGroup.id]
     assign_public_ip       = true
     skip_source_dest_check = true
-    nsg_ids                = [oci_core_network_security_group.SSHSecurityGroup.id, oci_core_network_security_group.HTTPxSecurityGroup.id]
   }
 
   source_details {
@@ -44,55 +44,33 @@ resource "oci_core_vnic_attachment" "vm_pan_firewall_vcn01pub02vnic_attachment" 
   create_vnic_details {
     subnet_id              = oci_core_subnet.vcn01_subnet_untrusted_pub02.id
     display_name           = "vcn01_untrusted_vnic"
-    assign_public_ip       = false
+    private_ip             = var.vm_pan_firewall_vcn01_priv02_vnic_ip
+    assign_public_ip       = true
     skip_source_dest_check = true
   }
   instance_id = oci_core_instance.vm_pan_firewall.id
-}
-
-resource "oci_core_private_ip" "vm_pan_firewall_vcn01_pub02_private_ip" {
-  ip_address   = var.vm_pan_firewall_vcn01_priv02_vnic_ip
-  vnic_id      = oci_core_vnic_attachment.vm_pan_firewall_vcn01pub02vnic_attachment.vnic_id
-  display_name = "vcn01priv02vnic_private_ip"
-}
-
-resource "oci_core_public_ip" "vm_pan_firewall_vcn01_pub02_public_ip" {
-  compartment_id = var.compartment_ocid
-  lifetime       = "RESERVED"
-  display_name   = "vcn01priv02vnic_public_ip"
-  private_ip_id  = oci_core_private_ip.vm_pan_firewall_vcn01_pub02_private_ip.id
 }
 
 resource "oci_core_vnic_attachment" "vm_pan_firewall_vcn01priv03vnic_attachment" {
   create_vnic_details {
     subnet_id              = oci_core_subnet.vcn01_subnet_trusted_priv03.id
     display_name           = "vcn01_trusted_vnic"
+    private_ip             = var.vm_pan_firewall_vcn01_priv03_vnic_ip
     assign_public_ip       = false
     skip_source_dest_check = true
   }
   instance_id = oci_core_instance.vm_pan_firewall.id
-}
-
-resource "oci_core_private_ip" "vm_pan_firewall_vcn01_priv03_private_ip" {
-  ip_address   = var.vm_pan_firewall_vcn01_priv03_vnic_ip
-  vnic_id      = oci_core_vnic_attachment.vm_pan_firewall_vcn01priv03vnic_attachment.vnic_id
-  display_name = "vcn01_trusted_vnic_private_ip"
 }
 
 resource "oci_core_vnic_attachment" "vm_pan_firewall_vcn02priv04vnic_attachment" {
   create_vnic_details {
     subnet_id              = oci_core_subnet.vcn02_subnet_trusted_priv04.id
     display_name           = "vcn02_trusted_vnic"
+    private_ip             = var.vm_pan_firewall_vcn02_priv04_vnic_ip
     assign_public_ip       = false
     skip_source_dest_check = true
   }
   instance_id = oci_core_instance.vm_pan_firewall.id
-}
-
-resource "oci_core_private_ip" "vm_pan_firewall_vcn02_priv04_private_ip" {
-  ip_address   = var.vm_pan_firewall_vcn02_priv04_vnic_ip
-  vnic_id      = oci_core_vnic_attachment.vm_pan_firewall_vcn02priv04vnic_attachment.vnic_id
-  display_name = "vcn02_trusted_vnic_private_ip"
 }
 
 # vm_vcn01pub02 in VCN01/Subnet02
@@ -115,7 +93,6 @@ resource "oci_core_instance" "vm_vcn01pub2" {
     subnet_id        = oci_core_subnet.vcn01_subnet_untrusted_pub02.id
     display_name     = "vm_vcn01pub02_vnic"
     assign_public_ip = false
-    nsg_ids          = [oci_core_network_security_group.SSHSecurityGroup.id]
   }
 
   source_details {
@@ -157,7 +134,6 @@ resource "oci_core_instance" "vm_vcn01priv03" {
     subnet_id        = oci_core_subnet.vcn01_subnet_trusted_priv03.id
     display_name     = "vm_vcn01priv03_vnic"
     assign_public_ip = false
-    nsg_ids          = [oci_core_network_security_group.SSHSecurityGroup.id]
   }
 
   source_details {
@@ -184,7 +160,6 @@ data "oci_core_vnic" "vm_vcn01pub2_primaryvnic" {
   vnic_id = data.oci_core_vnic_attachments.vm_vcn01priv03_primaryvnic_attach.vnic_attachments.0.vnic_id
 }
 
-
 # vm_vcn02priv04 in VCN02/Subnet04
 
 resource "oci_core_instance" "vm_vcn02priv04" {
@@ -205,7 +180,6 @@ resource "oci_core_instance" "vm_vcn02priv04" {
     subnet_id        = oci_core_subnet.vcn02_subnet_trusted_priv04.id
     display_name     = "vm_vcn02priv04_vnic"
     assign_public_ip = false
-    nsg_ids          = [oci_core_network_security_group.SSHSecurityGroup2.id]
   }
 
   source_details {
