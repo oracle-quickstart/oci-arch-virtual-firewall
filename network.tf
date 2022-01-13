@@ -46,6 +46,10 @@ resource "oci_core_nat_gateway" "vcn01_nat_gateway" {
   defined_tags   = { "${oci_identity_tag_namespace.ArchitectureCenterTagNamespace.name}.${oci_identity_tag.ArchitectureCenterTag.name}" = var.release }
 }
 
+data "oci_core_private_ips" "vm_pan_firewall_vcn01priv03vnic_ip" {
+  vnic_id = oci_core_vnic_attachment.vm_pan_firewall_vcn01priv03vnic_attachment.vnic_id
+}
+
 resource "oci_core_route_table" "vcn01_paloalto_route_table" {
   compartment_id = var.compartment_ocid
   vcn_id         = oci_core_vcn.vcn01.id
@@ -57,12 +61,16 @@ resource "oci_core_route_table" "vcn01_paloalto_route_table" {
   }
 
   route_rules {
-    network_entity_id = oci_core_private_ip.vm_pan_firewall_vcn01_priv03_private_ip.id
+    network_entity_id = lookup(element(lookup(data.oci_core_private_ips.vm_pan_firewall_vcn01priv03vnic_ip, "private_ips"), 0), "id")
     destination       = var.vcn02_subnet_trusted_priv04_cidr_block
     destination_type  = "CIDR_BLOCK"
   }
 
   defined_tags = { "${oci_identity_tag_namespace.ArchitectureCenterTagNamespace.name}.${oci_identity_tag.ArchitectureCenterTag.name}" = var.release }
+}
+
+data "oci_core_private_ips" "vm_pan_firewall_vcn02priv04vnic_ip" {
+  vnic_id = oci_core_vnic_attachment.vm_pan_firewall_vcn02priv04vnic_attachment.vnic_id
 }
 
 resource "oci_core_route_table" "vcn02_paloalto_route_table" {
@@ -71,7 +79,7 @@ resource "oci_core_route_table" "vcn02_paloalto_route_table" {
   display_name   = "vcn02_paloalto_route_table"
 
   route_rules {
-    network_entity_id = oci_core_private_ip.vm_pan_firewall_vcn02_priv04_private_ip.id
+    network_entity_id = lookup(element(lookup(data.oci_core_private_ips.vm_pan_firewall_vcn02priv04vnic_ip, "private_ips"), 0), "id")
     destination       = var.vcn01_subnet_trusted_priv03_cidr_block
     destination_type  = "CIDR_BLOCK"
   }
