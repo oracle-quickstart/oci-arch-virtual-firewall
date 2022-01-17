@@ -92,7 +92,7 @@ resource "oci_core_instance" "vm_vcn01pub2" {
   create_vnic_details {
     subnet_id        = oci_core_subnet.vcn01_subnet_untrusted_pub02.id
     display_name     = "vm_vcn01pub02_vnic"
-    assign_public_ip = false
+    assign_public_ip = true
   }
 
   source_details {
